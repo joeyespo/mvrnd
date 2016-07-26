@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import re
 import os
 import sys
@@ -14,20 +16,20 @@ def is_special(filename):
 
 
 def move_random_file(from_path, to_path, delete_empty=False):
-    print 'Moving a random file...'
+    print('Moving a random file...')
 
     filenames = [f for f in os.listdir(from_path) if not is_special(f)]
     if len(filenames) == 0:
         # TODO: Delete directory if delete_empty
-        print '-> No files to move!'
+        print('-> No files to move!')
         return
 
     file_index = random.randint(0, len(filenames) - 1)
     filename = filenames[file_index]
 
-    print '-> From:', from_path
-    print '->   To:', to_path
-    print '-> File:', filename
+    print('-> From:', from_path)
+    print('->   To:', to_path)
+    print('-> File:', filename)
 
     shutil.move(os.path.join(from_path, filename), to_path)
 
@@ -50,8 +52,8 @@ def move_random_file_ext(from_path, to_path):
         return
 
     for filename in filenames:
-        print
-        print '***', filename, '***'
+        print()
+        print('***', filename, '***')
 
         attributes = {
             'dayofweek': extract_attribute(filename, r'@', r'[A-Za-z]+'),
@@ -62,7 +64,7 @@ def move_random_file_ext(from_path, to_path):
         if attributes['dayofweek']:
             dayofweek = attributes['dayofweek'].lower()
             if dayofweek != WEEKDAYS[datetime.today().weekday()]:
-                print '-> Not moving; today is not "{0}"'.format(dayofweek)
+                print('-> Not moving; today is not "{0}"'.format(dayofweek))
                 continue
 
         for i in range(attributes['repeat']):
@@ -73,8 +75,8 @@ def run(argv=None):
     if not argv:
         argv = sys.argv
     if len(argv) < 3:
-        print 'Usage'
-        print '  mvrnd <from> <to>'
+        print('Usage')
+        print('  mvrnd <from> <to>')
         return 2
     move_random_file(argv[1], argv[2])
     move_random_file_ext(argv[1], argv[2])
