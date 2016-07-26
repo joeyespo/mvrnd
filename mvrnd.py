@@ -1,11 +1,19 @@
 from __future__ import print_function
 
+import errno
 import re
 import os
 import sys
 import shutil
 import random
+from traceback import print_exc
 from datetime import datetime
+
+
+try:
+    input = raw_input
+except NameError:
+    pass
 
 
 WEEKDAYS = ['mon', 'tues', 'wed', 'thurs', 'fri', 'sat', 'sun']
@@ -30,7 +38,12 @@ def move_random_file(from_path, to_path):
     print('->   To:', to_path)
     print('-> File:', filename)
 
-    os.makedirs(to_path)
+    try:
+        os.makedirs(to_path)
+    except OSError as ex:
+        if ex.errno != errno.EEXIST or not os.path.isdir(to_path):
+            raise
+
     shutil.move(os.path.join(from_path, filename), to_path)
 
 
@@ -79,8 +92,13 @@ def run(argv=None):
         print('  mvrnd <from> <to>')
         return 2
 
-    move_random_files(argv[1], argv[2])
-    return 0
+    try:
+        move_random_files(argv[1], argv[2])
+        return 0
+    except Exception:
+        print_exc()
+        input('Press ENTER to continue . . .')
+        return 1
 
 
 if __name__ == '__main__':
