@@ -46,6 +46,7 @@ def move_random_files(from_path, to_path):
         print()
         print('***', filename, '***')
         current_path = os.path.join(from_path, filename)
+        next_path = os.path.join(to_path, filename)
 
         # Filter day-of-week
         dayofweek = _extract_attribute(current_path, r'@', r'[A-Za-z]+')
@@ -59,10 +60,10 @@ def move_random_files(from_path, to_path):
         if count:
             repeat = int(count) - 1
             for i in range(repeat):
-                move_random_file(current_path, to_path)
+                move_random_file(current_path, next_path)
 
         # Recurse
-        move_random_files(current_path, to_path)
+        move_random_files(current_path, next_path)
 
 
 def _extract_attribute(name, delimiter, pattern):
