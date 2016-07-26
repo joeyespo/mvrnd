@@ -30,42 +30,44 @@ def move_random_file(from_path, to_path):
     print('->   To:', to_path)
     print('-> File:', filename)
 
+    os.makedirs(to_path)
     shutil.move(os.path.join(from_path, filename), to_path)
 
 
-def move_random_file_ext(from_path, to_path):
-    filenames = [f for f in os.listdir(from_path) if is_special(f)]
-    if len(filenames) == 0:
-        return
+def move_random_files(from_path, to_path):
+    # Move random non-special files and subdirectories
+    move_random_file(from_path, to_path)
 
-    for filename in filenames:
+    # Recurse through special directories
+    for filename in os.listdir(from_path):
+        if not is_special(filename):
+            continue
+
         print()
         print('***', filename, '***')
+        current_path = os.path.join(from_path, filename)
 
-        attributes = {
-            'dayofweek': _extract_attribute(filename, r'@', r'[A-Za-z]+'),
-            'repeat': int(_extract_attribute(filename, r'\+', r'[0-9]+', 1)),
-        }
-        filename = os.path.join(from_path, filename)
-
-        if attributes['dayofweek']:
-            dayofweek = attributes['dayofweek'].lower()
-            if dayofweek != WEEKDAYS[datetime.today().weekday()]:
+        # Filter day-of-week
+        dayofweek = _extract_attribute(current_path, r'@', r'[A-Za-z]+')
+        if dayofweek:
+            if dayofweek.lower() != WEEKDAYS[datetime.today().weekday()]:
                 print('-> Not moving; today is not "{0}"'.format(dayofweek))
                 continue
 
-        for i in range(attributes['repeat']):
-            move_random_file(filename, to_path)
+        # Repeated recursions
+        count = _extract_attribute(current_path, r'\+', r'[0-9]+')
+        if count:
+            repeat = int(count) - 1
+            for i in range(repeat):
+                move_random_file(current_path, to_path)
+
+        # Recurse
+        move_random_files(current_path, to_path)
 
 
-
-def _extract_attribute(name, delimiter, pattern, default=None):
+def _extract_attribute(name, delimiter, pattern):
     m = re.search(r'{0}(?P<value>{1})'.format(delimiter, pattern), name)
-    if m:
-        value = m.groupdict()['value']
-        if value is not None:
-            return value
-    return default
+    return m.groupdict()['value'] if m else None
 
 
 def run(argv=None):
@@ -75,8 +77,8 @@ def run(argv=None):
         print('Usage')
         print('  mvrnd <from> <to>')
         return 2
-    move_random_file(argv[1], argv[2])
-    move_random_file_ext(argv[1], argv[2])
+
+    move_random_files(argv[1], argv[2])
     return 0
 
 
