@@ -33,18 +33,6 @@ def move_random_file(from_path, to_path):
     shutil.move(os.path.join(from_path, filename), to_path)
 
 
-def extract_attribute(name, delimiter, pattern, default=None):
-    m = re.search(r'{0}(?P<value>{1})'.format(delimiter, pattern), name)
-    if not m:
-        return default
-
-    value = m.groupdict()['value']
-    if value is None:
-        return default
-
-    return value
-
-
 def move_random_file_ext(from_path, to_path):
     filenames = [f for f in os.listdir(from_path) if is_special(f)]
     if len(filenames) == 0:
@@ -55,8 +43,8 @@ def move_random_file_ext(from_path, to_path):
         print('***', filename, '***')
 
         attributes = {
-            'dayofweek': extract_attribute(filename, r'@', r'[A-Za-z]+'),
-            'repeat': int(extract_attribute(filename, r'\+', r'[0-9]+', 1)),
+            'dayofweek': _extract_attribute(filename, r'@', r'[A-Za-z]+'),
+            'repeat': int(_extract_attribute(filename, r'\+', r'[0-9]+', 1)),
         }
         filename = os.path.join(from_path, filename)
 
@@ -68,6 +56,16 @@ def move_random_file_ext(from_path, to_path):
 
         for i in range(attributes['repeat']):
             move_random_file(filename, to_path)
+
+
+
+def _extract_attribute(name, delimiter, pattern, default=None):
+    m = re.search(r'{0}(?P<value>{1})'.format(delimiter, pattern), name)
+    if m:
+        value = m.groupdict()['value']
+        if value is not None:
+            return value
+    return default
 
 
 def run(argv=None):
