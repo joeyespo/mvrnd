@@ -15,12 +15,11 @@ def is_special(filename):
     return filename.startswith('(') and filename.endswith(')')
 
 
-def move_random_file(from_path, to_path, delete_empty=False):
+def move_random_file(from_path, to_path):
     print('Moving a random file...')
 
     filenames = [f for f in os.listdir(from_path) if not is_special(f)]
     if len(filenames) == 0:
-        # TODO: Delete directory if delete_empty
         print('-> No files to move!')
         return
 
