@@ -1,11 +1,11 @@
 from __future__ import print_function
 
 import errno
-import re
 import os
-import sys
-import shutil
 import random
+import re
+import shutil
+import sys
 from traceback import print_exc
 from datetime import datetime
 
