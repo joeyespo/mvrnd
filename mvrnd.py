@@ -1,5 +1,6 @@
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 
+import codecs
 import errno
 import os
 import random
@@ -16,7 +17,11 @@ except NameError:
     pass
 
 
+ENCODING = sys.stdout.encoding or 'utf-8'
 WEEKDAYS = ['mon', 'tues', 'wed', 'thurs', 'fri', 'sat', 'sun']
+
+
+codecs.register_error('dash', lambda e: (u'-', e.start + 1))
 
 
 def is_special(filename):
@@ -34,9 +39,9 @@ def move_random_file(from_path, to_path):
     file_index = random.randint(0, len(filenames) - 1)
     filename = filenames[file_index]
 
-    print('-> From:', from_path)
-    print('->   To:', to_path)
-    print('-> File:', filename)
+    print('-> From:', from_path.encode(ENCODING, 'dash'))
+    print('->   To:', to_path.encode(ENCODING, 'dash'))
+    print('-> File:', filename.encode(ENCODING, 'dash'))
 
     try:
         os.makedirs(to_path)
@@ -57,7 +62,7 @@ def move_random_files(from_path, to_path):
             continue
 
         print()
-        print('***', filename, '***')
+        print('***', filename.encode(ENCODING, 'dash'), '***')
         current_path = os.path.join(from_path, filename)
         next_path = os.path.join(to_path, filename)
 
@@ -87,13 +92,14 @@ def _extract_attribute(name, delimiter, pattern):
 def run(argv=None):
     if not argv:
         argv = sys.argv
+
     if len(argv) < 3:
         print('Usage')
         print('  mvrnd <from> <to>')
         return 2
 
     try:
-        move_random_files(argv[1], argv[2])
+        move_random_files(argv[1].decode(ENCODING), argv[2].decode(ENCODING))
         return 0
     except Exception:
         print_exc()
