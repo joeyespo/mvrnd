@@ -63,25 +63,25 @@ def move_random_files(from_path, to_path):
 
         print()
         print('***', filename.encode(ENCODING, 'dash'), '***')
-        current_path = os.path.join(from_path, filename)
-        next_path = os.path.join(to_path, filename)
+        next_from_path = os.path.join(from_path, filename)
+        next_to_path = os.path.join(to_path, filename)
 
         # Filter day-of-week
-        dayofweek = _extract_attribute(current_path, r'@', r'[A-Za-z]+')
+        dayofweek = _extract_attribute(next_from_path, r'@', r'[A-Za-z]+')
         if dayofweek:
             if dayofweek.lower() != WEEKDAYS[datetime.today().weekday()]:
                 print('-> Not moving; today is not "{0}"'.format(dayofweek))
                 continue
 
         # Repeated recursions
-        count = _extract_attribute(current_path, r'\+', r'[0-9]+')
+        count = _extract_attribute(next_from_path, r'\+', r'[0-9]+')
         if count:
             repeat = int(count) - 1
             for i in range(repeat):
-                move_random_file(current_path, next_path)
+                move_random_file(next_from_path, next_to_path)
 
         # Recurse
-        move_random_files(current_path, next_path)
+        move_random_files(next_from_path, next_to_path)
 
 
 def _extract_attribute(name, delimiter, pattern):
