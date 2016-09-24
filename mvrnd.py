@@ -24,8 +24,16 @@ WEEKDAYS = ['mon', 'tues', 'wed', 'thurs', 'fri', 'sat', 'sun']
 codecs.register_error('dash', lambda e: (u'-', e.start + 1))
 
 
-def is_special(filename):
+def is_merge_filename(filename):
+    return filename.startswith('([') and filename.endswith('])')
+
+
+def is_recurse_filename(filename):
     return filename.startswith('(') and filename.endswith(')')
+
+
+def is_special(filename):
+    return is_recurse_filename(filename) or is_merge_filename(filename)
 
 
 def move_random_file(from_path, to_path):
@@ -64,7 +72,9 @@ def move_random_files(from_path, to_path):
         print()
         print('***', filename.encode(ENCODING, 'dash'), '***')
         next_from_path = os.path.join(from_path, filename)
-        next_to_path = os.path.join(to_path, filename)
+
+        if not is_merge_filename(filename):
+            next_to_path = os.path.join(to_path, filename)
 
         # Filter day-of-week
         dayofweek = _extract_attribute(next_from_path, r'@', r'[A-Za-z]+')
