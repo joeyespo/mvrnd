@@ -73,7 +73,7 @@ def move_random_files(from_path, to_path):
         print('***', filename.encode(ENCODING, 'dash'), '***')
         next_from_path = os.path.join(from_path, filename)
 
-        if not is_merge_filename(filename):
+        if not is_merge_filename(os.path.join(to_path, filename)):
             next_to_path = os.path.join(to_path, filename)
 
         # Filter day-of-week
