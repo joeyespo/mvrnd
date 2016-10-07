@@ -36,10 +36,13 @@ def is_special(filename):
     return is_recurse_filename(filename) or is_merge_filename(filename)
 
 
-def move_random_file(from_dir, to_dir):
+def move_random_file(from_dir, to_dir, collect=None):
     print('Moving a random file...')
 
     filenames = [f for f in os.listdir(from_dir) if not is_special(f)]
+    if collect:
+        collected_here = collect.get(from_dir, [])
+        filenames = [f for f in filenames if f not in collected_here]
     if len(filenames) == 0:
         print('-> No files to move!')
         return
@@ -51,6 +54,10 @@ def move_random_file(from_dir, to_dir):
     print('-> From:', from_path.encode(ENCODING, 'dash'))
     print('->   To:', to_dir.encode(ENCODING, 'dash'))
 
+    if collect is not None:
+        collect.setdefault(from_dir, []).append(filename)
+        return
+
     try:
         os.makedirs(to_dir)
     except OSError as ex:
@@ -60,9 +67,9 @@ def move_random_file(from_dir, to_dir):
     shutil.move(from_path, to_dir)
 
 
-def move_random_files(from_dir, to_dir):
+def move_random_files(from_dir, to_dir, collect=None):
     # Move random non-special files and subdirectories
-    move_random_file(from_dir, to_dir)
+    move_random_file(from_dir, to_dir, collect)
 
     # Recurse through special directories
     for filename in os.listdir(from_dir):
@@ -88,10 +95,10 @@ def move_random_files(from_dir, to_dir):
         if count:
             repeat = int(count) - 1
             for i in range(repeat):
-                move_random_file(next_from_dir, next_to_dir)
+                move_random_file(next_from_dir, next_to_dir, collect)
 
         # Recurse
-        move_random_files(next_from_dir, next_to_dir)
+        move_random_files(next_from_dir, next_to_dir, collect)
 
 
 def _extract_attribute(name, delimiter, pattern):
@@ -103,13 +110,23 @@ def run(argv=None):
     if not argv:
         argv = sys.argv
 
+    dry_run = False
+    if '--dry-run' in argv:
+        argv.remove('--dry-run')
+        dry_run = True
+    if '-d' in argv:
+        argv.remove('-d')
+        dry_run = True
+
     if len(argv) < 3:
         print('Usage')
         print('  mvrnd <from> <to>')
         return 2
 
     try:
-        move_random_files(argv[1].decode(ENCODING), argv[2].decode(ENCODING))
+        move_random_files(
+            argv[1].decode(ENCODING), argv[2].decode(ENCODING),
+            collect=({} if dry_run else None))
         return 0
     except Exception:
         print_exc()
