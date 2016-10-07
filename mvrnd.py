@@ -36,62 +36,62 @@ def is_special(filename):
     return is_recurse_filename(filename) or is_merge_filename(filename)
 
 
-def move_random_file(from_path, to_path):
+def move_random_file(from_dir, to_dir):
     print('Moving a random file...')
 
-    filenames = [f for f in os.listdir(from_path) if not is_special(f)]
+    filenames = [f for f in os.listdir(from_dir) if not is_special(f)]
     if len(filenames) == 0:
         print('-> No files to move!')
         return
 
     file_index = random.randint(0, len(filenames) - 1)
     filename = filenames[file_index]
+    from_path = os.path.join(from_dir, filename)
 
     print('-> From:', from_path.encode(ENCODING, 'dash'))
-    print('->   To:', to_path.encode(ENCODING, 'dash'))
-    print('-> File:', filename.encode(ENCODING, 'dash'))
+    print('->   To:', to_dir.encode(ENCODING, 'dash'))
 
     try:
-        os.makedirs(to_path)
+        os.makedirs(to_dir)
     except OSError as ex:
-        if ex.errno != errno.EEXIST or not os.path.isdir(to_path):
+        if ex.errno != errno.EEXIST or not os.path.isdir(to_dir):
             raise
 
-    shutil.move(os.path.join(from_path, filename), to_path)
+    shutil.move(from_path, to_dir)
 
 
-def move_random_files(from_path, to_path):
+def move_random_files(from_dir, to_dir):
     # Move random non-special files and subdirectories
-    move_random_file(from_path, to_path)
+    move_random_file(from_dir, to_dir)
 
     # Recurse through special directories
-    for filename in os.listdir(from_path):
+    for filename in os.listdir(from_dir):
         if not is_special(filename):
             continue
 
         print()
         print('***', filename.encode(ENCODING, 'dash'), '***')
-        next_from_path = os.path.join(from_path, filename)
+        next_from_dir = os.path.join(from_dir, filename)
 
-        if not is_merge_filename(os.path.join(to_path, filename)):
-            next_to_path = os.path.join(to_path, filename)
+        if not is_merge_filename(os.path.join(to_dir, filename)):
+            next_to_dir = os.path.join(to_dir, filename)
 
         # Filter day-of-week
-        dayofweek = _extract_attribute(next_from_path, r'@', r'[A-Za-z]+')
+        dayofweek = _extract_attribute(next_from_dir, r'@', r'[A-Za-z]+')
         if dayofweek:
             if dayofweek.lower() != WEEKDAYS[datetime.today().weekday()]:
                 print('-> Not moving; today is not "{0}"'.format(dayofweek))
                 continue
 
         # Repeated recursions
-        count = _extract_attribute(next_from_path, r'\+', r'[0-9]+')
+        count = _extract_attribute(next_from_dir, r'\+', r'[0-9]+')
         if count:
             repeat = int(count) - 1
             for i in range(repeat):
-                move_random_file(next_from_path, next_to_path)
+                move_random_file(next_from_dir, next_to_dir)
 
         # Recurse
-        move_random_files(next_from_path, next_to_path)
+        move_random_files(next_from_dir, next_to_dir)
 
 
 def _extract_attribute(name, delimiter, pattern):
