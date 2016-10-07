@@ -81,10 +81,12 @@ def move_random_files(from_dir, to_dir, count=None, collect=None):
 
         print()
         print('***', filename.encode(ENCODING, 'dash'), '***')
-        next_from_dir = os.path.join(from_dir, filename)
 
-        if not is_merge_filename(os.path.join(to_dir, filename)):
-            next_to_dir = os.path.join(to_dir, filename)
+        # Compute next subdirectories
+        next_from_dir = os.path.join(from_dir, filename)
+        next_to_dir = (os.path.join(to_dir, filename) if
+                       not is_merge_filename(filename) else
+                       to_dir)
 
         # Filter day-of-week
         dayofweek = _extract_attribute(next_from_dir, r'@', r'[A-Za-z]+')
