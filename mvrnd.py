@@ -12,12 +12,11 @@ from datetime import datetime
 
 
 try:
-    input = raw_input
+    prompt = raw_input
 except NameError:
-    pass
+    prompt = input
 
 
-ENCODING = sys.stdout.encoding or 'utf-8'
 WEEKDAYS = ['mon', 'tues', 'wed', 'thurs', 'fri', 'sat', 'sun']
 
 
@@ -51,8 +50,8 @@ def move_random_file(from_dir, to_dir, collect=None):
     filename = filenames[file_index]
     from_path = os.path.join(from_dir, filename)
 
-    print('-> From:', from_path.encode(ENCODING, 'dash'))
-    print('->   To:', to_dir.encode(ENCODING, 'dash'))
+    print('-> From:', from_path)
+    print('->   To:', to_dir)
 
     if collect is not None:
         collect.setdefault(from_dir, []).append(filename)
@@ -80,7 +79,7 @@ def move_random_files(from_dir, to_dir, count=None, collect=None):
             continue
 
         print()
-        print('***', filename.encode(ENCODING, 'dash'), '***')
+        print('***', filename, '***')
 
         # Compute next subdirectories
         next_from_dir = os.path.join(from_dir, filename)
@@ -127,13 +126,11 @@ def run(argv=None):
         return 2
 
     try:
-        move_random_files(
-            argv[1].decode(ENCODING), argv[2].decode(ENCODING),
-            collect=({} if dry_run else None))
+        move_random_files(argv[1], argv[2], collect=({} if dry_run else None))
         return 0
     except Exception:
         print_exc()
-        input('Press ENTER to continue . . .')
+        prompt('Press ENTER to continue . . .')
         return 1
 
 
