@@ -24,7 +24,7 @@ FIRST_DAY = 'first'
 codecs.register_error('dash', lambda e: (u'-', e.start + 1))
 
 
-def is_merge_filename(filename):
+def is_copy_filename(filename):
     return filename.startswith('([') and filename.endswith('])')
 
 
@@ -33,7 +33,7 @@ def is_recurse_filename(filename):
 
 
 def is_special(filename):
-    return is_recurse_filename(filename) or is_merge_filename(filename)
+    return is_recurse_filename(filename) or is_copy_filename(filename)
 
 
 def move_random_file(from_dir, to_dir, collect=None):
@@ -85,7 +85,7 @@ def move_random_files(from_dir, to_dir, count=None, collect=None):
         # Compute next subdirectories
         next_from_dir = os.path.join(from_dir, filename)
         next_to_dir = (os.path.join(to_dir, filename) if
-                       not is_merge_filename(filename) else
+                       is_copy_filename(filename) else
                        to_dir)
 
         # Filter day-of-week
