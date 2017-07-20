@@ -18,6 +18,7 @@ except NameError:
 
 
 WEEKDAYS = ['mon', 'tues', 'wed', 'thurs', 'fri', 'sat', 'sun']
+FIRST_DAY = 'first'
 
 
 codecs.register_error('dash', lambda e: (u'-', e.start + 1))
@@ -88,10 +89,14 @@ def move_random_files(from_dir, to_dir, count=None, collect=None):
                        to_dir)
 
         # Filter day-of-week
-        dayofweek = _extract_attribute(next_from_dir, r'@', r'[A-Za-z]+')
-        if dayofweek:
-            if dayofweek.lower() != WEEKDAYS[datetime.today().weekday()]:
-                print('-> Not moving; today is not "{0}"'.format(dayofweek))
+        day_raw = _extract_attribute(next_from_dir, r'@', r'[A-Za-z]+')
+        if day_raw:
+            day = day_raw.lower()
+            if day in WEEKDAYS and day != WEEKDAYS[datetime.today().weekday()]:
+                print('-> Not moving; today is not "{0}"'.format(day_raw))
+                continue
+            if day == FIRST_DAY and datetime.today().day != 1:
+                print('-> Not moving; today is not the first of the month')
                 continue
 
         # Repeated recursions
