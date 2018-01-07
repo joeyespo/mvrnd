@@ -25,22 +25,18 @@ YEARLY = 'yearly'
 codecs.register_error('dash', lambda e: (u'-', e.start + 1))
 
 
-def is_copy_filename(filename):
-    return filename.startswith('([') and filename.endswith('])')
-
-
-def is_recurse_filename(filename):
+def is_recursive(filename):
     return filename.startswith('(') and filename.endswith(')')
 
 
-def is_special(filename):
-    return is_recurse_filename(filename) or is_copy_filename(filename)
+def is_recursive_copy(filename):
+    return filename.startswith('([') and filename.endswith('])')
 
 
 def move_random_file(from_dir, to_dir, collect=None):
     print('Moving a random file...')
 
-    filenames = [f for f in os.listdir(from_dir) if not is_special(f)]
+    filenames = [f for f in os.listdir(from_dir) if not is_recursive(f)]
     if collect:
         collected_here = collect.get(from_dir, [])
         filenames = [f for f in filenames if f not in collected_here]
@@ -70,14 +66,14 @@ def move_random_file(from_dir, to_dir, collect=None):
 
 
 def move_random_files(from_dir, to_dir, count=None, collect=None):
-    # Move random non-special files and subdirectories
+    # Move up to N random non-special files and subdirectories
     for i in range(count or 1):
         if not move_random_file(from_dir, to_dir, collect):
             break
 
     # Recurse through special directories
     for filename in os.listdir(from_dir):
-        if not is_special(filename):
+        if not is_recursive(filename):
             continue
 
         print()
@@ -86,7 +82,7 @@ def move_random_files(from_dir, to_dir, count=None, collect=None):
         # Compute next subdirectories
         next_from_dir = os.path.join(from_dir, filename)
         next_to_dir = (os.path.join(to_dir, filename) if
-                       is_copy_filename(filename) else
+                       is_recursive_copy(filename) else
                        to_dir)
 
         # Filter day-of-week
