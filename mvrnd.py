@@ -18,7 +18,8 @@ except NameError:
 
 
 WEEKDAYS = ['mon', 'tues', 'wed', 'thurs', 'fri', 'sat', 'sun']
-FIRST_DAY = 'first'
+MONTHLY = 'monthly'
+YEARLY = 'yearly'
 
 
 codecs.register_error('dash', lambda e: (u'-', e.start + 1))
@@ -92,11 +93,15 @@ def move_random_files(from_dir, to_dir, count=None, collect=None):
         day_raw = _extract_attribute(next_from_dir, r'@', r'[A-Za-z]+')
         if day_raw:
             day = day_raw.lower()
-            if day in WEEKDAYS and day != WEEKDAYS[datetime.today().weekday()]:
+            today = datetime.today()
+            if day in WEEKDAYS and day != WEEKDAYS[today.weekday()]:
                 print('-> Not moving; today is not "{0}"'.format(day_raw))
                 continue
-            if day == FIRST_DAY and datetime.today().day != 1:
+            if day == MONTHLY and today.day != 1:
                 print('-> Not moving; today is not the first of the month')
+                continue
+            if day == YEARLY and (today.day != 1 or today.month != 1):
+                print('-> Not moving; today is not the first of the year')
                 continue
 
         # Repeated recursions
