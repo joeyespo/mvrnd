@@ -25,6 +25,10 @@ YEARLY = 'yearly'
 codecs.register_error('dash', lambda e: (u'-', e.start + 1))
 
 
+def is_group(filename):
+    return filename.startswith('{') and filename.endswith('}')
+
+
 def is_recursive(filename):
     return filename.startswith('(') and filename.endswith(')')
 
@@ -33,8 +37,9 @@ def is_recursive_copy(filename):
     return filename.startswith('([') and filename.endswith('])')
 
 
-def move_random_file(from_dir, to_dir, collect=None):
-    print('Moving a random file...')
+def move_random_file(from_dir, to_dir, collect=None, in_group=False):
+    if not in_group:
+        print('Moving a random file...')
 
     # Collect all non-recursive files and do nothing if this set is empty
     filenames = [f for f in os.listdir(from_dir) if not is_recursive(f)]
@@ -49,6 +54,19 @@ def move_random_file(from_dir, to_dir, collect=None):
     file_index = random.randint(0, len(filenames) - 1)
     filename = filenames[file_index]
     from_path = os.path.join(from_dir, filename)
+    to_path = os.path.join(to_dir, filename)
+
+    # If file is a non-empty group, pick a random file out of the group
+    if is_group(filename):
+        moved = move_random_file(from_path, to_path, collect, True)
+        # Clean up empty groups
+        try:
+            os.rmdir(from_path)
+        except OSError as ex:
+            # Ignore "not empty" errors, raise all others
+            if ex.errno != errno.ENOTEMPTY:
+                raise
+        return moved
 
     print('-> From:', from_path)
     print('->   To:', to_dir)
