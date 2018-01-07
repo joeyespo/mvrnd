@@ -17,7 +17,9 @@ except NameError:
     prompt = input
 
 
-WEEKDAYS = ['mon', 'tues', 'wed', 'thurs', 'fri', 'sat', 'sun']
+DAY_NAMES = ['mon', 'tues', 'wed', 'thurs', 'fri', 'sat', 'sun']
+WORKDAY_NAMES = ['mon', 'tues', 'wed', 'thurs', 'fri']
+WORKDAY = 'work'
 MONTHLY = 'monthly'
 YEARLY = 'yearly'
 
@@ -113,7 +115,8 @@ def move_random_files(from_dir, to_dir, count=None, collect=None):
         if day_raw:
             day = day_raw.lower()
             today = datetime.today()
-            if day in WEEKDAYS and day != WEEKDAYS[today.weekday()]:
+            today_name = DAY_NAMES[today.weekday()]
+            if day in DAY_NAMES and day != today_name:
                 print('-> Not moving; today is not "{0}"'.format(day_raw))
                 continue
             if day == MONTHLY and today.day != 1:
@@ -121,6 +124,9 @@ def move_random_files(from_dir, to_dir, count=None, collect=None):
                 continue
             if day == YEARLY and (today.day != 1 or today.month != 1):
                 print('-> Not moving; today is not the first of the year')
+                continue
+            if day == WORKDAY and today_name not in WORKDAY_NAMES:
+                print('-> Not moving; today is not a work day')
                 continue
 
         # Repeated recursions
