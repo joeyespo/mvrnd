@@ -36,6 +36,7 @@ def is_recursive_copy(filename):
 def move_random_file(from_dir, to_dir, collect=None):
     print('Moving a random file...')
 
+    # Collect all non-recursive files and do nothing if this set is empty
     filenames = [f for f in os.listdir(from_dir) if not is_recursive(f)]
     if collect:
         collected_here = collect.get(from_dir, [])
@@ -44,6 +45,7 @@ def move_random_file(from_dir, to_dir, collect=None):
         print('-> No files to move!')
         return False
 
+    # Pick a file at random
     file_index = random.randint(0, len(filenames) - 1)
     filename = filenames[file_index]
     from_path = os.path.join(from_dir, filename)
@@ -51,16 +53,19 @@ def move_random_file(from_dir, to_dir, collect=None):
     print('-> From:', from_path)
     print('->   To:', to_dir)
 
+    # Do nothing if dry-run
     if collect is not None:
         collect.setdefault(from_dir, []).append(filename)
         return True
 
+    # Create target directory (if it doesn't exist)
     try:
         os.makedirs(to_dir)
     except OSError as ex:
         if ex.errno != errno.EEXIST or not os.path.isdir(to_dir):
             raise
 
+    # Move the file
     shutil.move(from_path, to_dir)
     return True
 
