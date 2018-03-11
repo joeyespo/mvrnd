@@ -62,12 +62,13 @@ def move_random_file(from_dir, to_dir, collect=None, in_group=False):
     if is_group(filename):
         moved = move_random_file(from_path, to_path, collect, True)
         # Clean up empty groups
-        try:
-            os.rmdir(from_path)
-        except OSError as ex:
-            # Ignore "not empty" errors, raise all others
-            if ex.errno != errno.ENOTEMPTY:
-                raise
+        if not os.listdir(from_path):
+            try:
+                os.rmdir(from_path)
+            except OSError as ex:
+                # Ignore "not empty" errors, raise all others
+                if ex.errno != errno.ENOTEMPTY:
+                    raise
         return moved
 
     print('-> From:', from_path)
